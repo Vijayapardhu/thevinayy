@@ -28,16 +28,18 @@ function AdminLayout() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const nav = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) nav({ to: "/admin/login" });
-      else if (!isAdmin) {
-        // not admin — sign out and back to login
-        signOut().then(() => nav({ to: "/admin/login" }));
-      }
+    if (loading || isLoginPage) return;
+    if (!user) nav({ to: "/admin/login" });
+    else if (!isAdmin) {
+      signOut().then(() => nav({ to: "/admin/login" }));
     }
-  }, [loading, user, isAdmin, nav, signOut]);
+  }, [loading, user, isAdmin, nav, signOut, isLoginPage]);
+
+  // Login page renders outside the protected chrome
+  if (isLoginPage) return <Outlet />;
 
   if (loading || !user || !isAdmin) {
     return (
